@@ -1,0 +1,2 @@
+"0","# Creamos la función de log-verosimilitud específica para nuestra muestra"
+"0","log_p <- crear_log_p(x)"

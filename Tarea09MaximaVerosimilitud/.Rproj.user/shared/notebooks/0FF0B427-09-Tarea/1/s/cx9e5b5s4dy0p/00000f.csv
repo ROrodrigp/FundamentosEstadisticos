@@ -1,0 +1,3 @@
+"0","# Crear la función de log-verosimilitud"
+"0","log_verosim_func <- crear_log_verosim(n = 500, n_err = 121)"
+"0",""

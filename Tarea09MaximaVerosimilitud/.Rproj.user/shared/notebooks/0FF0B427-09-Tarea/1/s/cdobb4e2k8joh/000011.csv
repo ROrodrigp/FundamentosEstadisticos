@@ -1,0 +1,8 @@
+"0",""
+"0","# Calcular el error estándar de la estimación de máxima verosimilitud"
+"0","error_estandar <- sd(estimadores_mv)"
+"0","error_estandar"
+"1","[1]"
+"1"," 0.02157807"
+"1","
+"

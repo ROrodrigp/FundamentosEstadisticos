@@ -1,0 +1,3 @@
+"0","# Estimación de la media y la desviación estándar usando el estimador plug-in"
+"0","media_est <- mean(x)      "
+"0","de_est <- sd(x)           "

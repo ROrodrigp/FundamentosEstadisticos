@@ -1,0 +1,6 @@
+"0","sim_modelo <- function(p, n){"
+"0","  # rellena: qué es p y n"
+"0","  muestra <- rbinom(n, 1, p)"
+"0","  n_errores <- sum(muestra)"
+"0","  n_errores"
+"0","}"
