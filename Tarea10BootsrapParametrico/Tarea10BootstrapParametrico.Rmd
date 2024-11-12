@@ -1,0 +1,58 @@
+---
+title: "Tarea 10: Bootstrap Paramétrico"
+author: "Rodrigo Alan García Pérez"
+date: "2024-11-12"
+output: pdf_document
+---
+
+# Bootstrap paramétrico
+
+Sean $X_1, \dots, X_n \sim N(\mu, 1)$. Sea $\theta = e^{\mu}$, simula una muestra de $n=100$ observaciones usando $\mu = 5$.
+
+-   Usa el método delta para calcular $ee$ de $\hat{\theta}$ y crea un intervalo del 95% de confianza para $\hat{\theta}$. Pista: $ee(\hat{\mu}) = \frac{1}{\sqrt{n}}$
+
+```{r}
+# Generar la muestra 
+set.seed(123)
+n <- 100 
+mu <- 5 
+muestra <- rnorm(n, mean = mu, sd = 1)
+
+# Estimacion de theta 
+mu_hat <- mean(muestra)
+theta_hat <- exp(mu_hat)
+
+# Metodo delta 
+se_mu_hat <- 1 / sqrt(n) # error estandar de mu gorro 
+se_theta_hat <- theta_hat * se_mu_hat #g'(mu) * EE(mu) = Error estándar de theta_hat
+
+# Calcular el intervalo de confianza del 95%
+ci_delta <- round( c(theta_hat - 1.96 * se_theta_hat, theta_hat + 1.96 * se_theta_hat), 3)
+ci_delta
+
+
+```
+
+-   Repite el inciso anterior usando bootstrap paramétrico.
+
+```{r}
+set.seed(123)
+B <- 1000  # Número de muestras bootstrap
+theta_bootstrap <- numeric(B) # Inicializamos vector 
+
+# Ciclo para generar muestras bootstrap
+for (i in 1:B){
+  
+}
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
