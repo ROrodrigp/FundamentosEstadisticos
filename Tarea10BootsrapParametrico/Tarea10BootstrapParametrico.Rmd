@@ -30,7 +30,6 @@ se_theta_hat <- theta_hat * se_mu_hat #g'(mu) * EE(mu) = Error estándar de thet
 ci_delta <- round( c(theta_hat - 1.96 * se_theta_hat, theta_hat + 1.96 * se_theta_hat), 3)
 ci_delta
 
-
 ```
 
 -   Repite el inciso anterior usando bootstrap paramétrico.
@@ -38,21 +37,97 @@ ci_delta
 ```{r}
 set.seed(123)
 B <- 1000  # Número de muestras bootstrap
-theta_bootstrap <- numeric(B) # Inicializamos vector 
+theta_bootstrap_p <- numeric(B) # Inicializamos vector 
 
-# Ciclo para generar muestras bootstrap
+# Ciclo para generar muestras bootstrap paramétricas
 for (i in 1:B){
-  
+  muestra_bootstrap <- rnorm(n, mean = mu_hat, sd = 1)
+  mu_hat_bootstrap <- mean(muestra_bootstrap)
+  theta_bootstrap_p[i] <- exp(mu_hat_bootstrap)
 }
 
+# Intervalo de confianza 
+ci_bootstrap_param <- quantile(theta_bootstrap_p, probs = c(0.025, 0.975))
+ci_bootstrap_param
 ```
 
-## Including Plots
+-   Finalmente usa bootstrap no paramétrico.
 
-You can also embed plots, for example:
+```{r}
+B <- 1000  # Número de muestras bootstrap
+theta_bootstrap_np <- numeric(B) # Inicializamos vector 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Ciclo para generar muestras bootstrap no paramétricas 
+for (i in 1:B){
+  muestra_bootstrap <- sample(muestra, size = n, replace = TRUE) # Muestra con reemplazo de datos originales 
+  mu_hat_bootstrap <- mean(muestra_bootstrap)
+  theta_bootstrap_np[i] <- exp(mu_hat_bootstrap)
+}
+
+#Intervalo de confianza 
+# Paso 3: Calcular el intervalo de confianza del 95% usando percentiles bootstrap
+ci_bootstrap_np <- quantile(theta_bootstrap_np, probs = c(0.025, 0.975))
+ci_bootstrap_np
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+-   Compara tus respuestas.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+
+tabla_intervalos <- tibble(
+  Metodo =  c("Bootstrap No Paramétrico", "Bootstrap Paramétrico", "Método Delta"),
+  Limite_inferior = format(c(ci_bootstrap_np[1],
+                             ci_bootstrap_param[1],
+                             ci_delta[1]),
+                           nsmall = 3),
+  Limite_superior = format(c(ci_bootstrap_np[2],
+                             ci_bootstrap_param[2],
+                             ci_delta[2]), 
+                           nsmall = 3)
+) %>% 
+  mutate( Intervalo = format(as.numeric(Limite_superior) - as.numeric(Limite_inferior), nsmall = 3))
+
+tabla_intervalos
+```
+
+Se puede observar que de los tres métodos el método Delta es el que tiene el intervalo de confianza más amplio. Esto sugiere mayor incertidumbre en la estimación. El mejor método fue el bootstrap no paramétrico sin embargo se comporto de manera muy similar al paramétrico.
+
+-   Realiza un histograma de replicaciones bootstrap para cada método, estas son estimaciones de la distribución de $\hat{\theta}$. El método delta también nos da una aproximación a esta distribución: $\text{Normal}(\hat{\theta}, {\hat{ee}^2})$. Compáralos con la verdadera distribución de $\hat{\theta}$ (que puedes obtener vía simulación). ¿Cuál es la aproximación más cercana a la verdadera distribución?
+
+```{r}
+
+# Generar valores de theta usando metodo delta  
+theta_delta <- rnorm(B, mean = theta_hat, sd = se_theta_hat)
+
+# Simulacion de theta 
+theta_simulacion <- numeric(B)
+for (i in 1:B){
+  muestra_sim <- rnorm(n, mean = mu, sd = 1)
+  mu_hat_sim <- mean(muestra_sim)
+  theta_simulacion[i] <- exp(mu_hat_sim)
+}
+
+data <- data.frame(
+  theta = c(theta_bootstrap_np,
+            theta_bootstrap_p,
+            theta_delta,
+            theta_simulacion),
+  metodo = factor(rep(c("Bootstrap No Paramétrico",
+                        "Bootstrap Paramétrico",
+                        "Método Delta",
+                        "Distribución Verdadera"), 
+                      each = B))
+)
+
+# Graficar histogramas para cada método
+ggplot(data, aes(x = theta, fill = metodo)) +
+  geom_histogram(bins = 30, alpha = 0.5, position = "identity") +
+  facet_wrap(~ metodo, scales = "free") +
+  labs(title = "Comparación de Distribuciones de Estimaciones de theta", 
+       x = "Estimación de theta",
+       y = "Frecuencia") +
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
