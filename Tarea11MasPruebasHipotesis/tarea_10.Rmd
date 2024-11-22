@@ -1,0 +1,200 @@
+---
+title: "Tarea 11: Más pruebas de hipótesis"
+author: "Rodrigo Alan García Pérez"
+date: "2024-11-21"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Más pruebas de hipótesis {.unnumbered}
+
+1.  (Chihara) Los niveles de calcio en adultos saludables se distribuyen
+    de acuerdo a una Normal con media 9.5 mg/dl y desviación estándar
+    desconocida. Un médico sospecha que la media de los niveles de
+    calcio para mujeres en su comunidad es distinta. Colecta mediciones
+    de 20 mujeres saludables y encuentra que la media es de 9.2 y la
+    desviación estándar muestral de 1.1. Escribe la hipótesis nula,
+    realiza una prueba de hipótesis e interpreta los resultados.
+
+Hipótesis nula: $\mu$ = 9.5 contra hipótesis alternativa: $\mu$ $\neq$
+9.5
+
+```{r}
+n <- 20                # Tamaño de la muestra
+x_bar <- 9.2           # Media muestral
+s <- 1.1               # Desviación estándar muestral
+
+mu_0 <- 9.5            # Media poblacional de hipotesis nula
+
+t_stat <- (x_bar - mu_0) / (s / sqrt(n))
+
+# Grados de libertad
+df <- n - 1
+
+# Valor p para prueba bilateral
+p_value <- 2 * pt(-abs(t_stat), df)
+
+cat("Estadístico t:", t_stat, "\n")
+cat("Grados de libertad:", df, "\n")
+cat("p-valor:", p_value, "\n")
+
+if (p_value < 0.05) {
+  cat("Rechazamos H0: la media es significativamente
+      diferente de 9.5 mg/dl.\n")
+} else {
+  cat("No podemos rechazar H0: no hay evidencia suficiente para
+      concluir que la media es diferente de 9.5 mg/dl.\n")
+}
+
+```
+
+2.  (Wasserman) Mendel criaba chícharos de semillas lisas amarillas y de
+    semillas corrugadas verdes. Éstas daban lugar a 4 tipos de
+    descendientes: amarrillas lisas, amarillas corrugadas, verdes lisas
+    y verdes corrugadas. El número de cada una es multinomial con
+    parámetro $p=(p_1, p_2, p_3, p_4)$. De acuerdo a su teoría de
+    herencia este vector de probabilidades es:
+    $$p=(9/16,3/16,3/16,1/16)$$
+
+A lo largo de $n=556$ experimentos observó $x=(315,101,108,32)$. Utiliza
+la prueba de cociente de verosimilitudes para probar $H_0:p=p_0$ contra
+$H_0:p\ne p_0$.
+
+La fórmula de $G^2$ es: $$
+G^2 = -2 \ln(\lambda),
+$$ donde: $$
+\ln(\lambda) = \ln(L(H_0)) - \ln(L(H_a)).
+$$
+
+1.  Log-verosimilitud bajo $H_0$: $$
+    \ln(L(H_0)) = \sum_{i=1}^k x_i \cdot \ln(p_{0i}).
+    $$
+
+2.  Log-verosimilitud bajo $H_a$: $$
+    \ln(L(H_a)) = \sum_{i=1}^k x_i \cdot \ln\left(\frac{x_i}{n}\right).
+    $$
+
+3.  Estadístico $G^2$: Combina ambos: $$
+    G^2 = 2 \sum_{i=1}^k x_i \cdot \left[ \ln\left(\frac{x_i}{n}\right) - \ln(p_{0i}) \right].
+    $$
+
+```{r}
+# Datos observados
+x <- c(315, 101, 108, 32)   # Frecuencias observadas
+n <- sum(x)                 # Tamaño total de la muestra
+
+# Probabilidades esperadas bajo H0
+p0 <- c(9/16, 3/16, 3/16, 1/16)
+
+# Cálculo de G^2 usando logaritmos
+G2 <- 2 * sum(x * (log(x / n) - log(p0)))
+
+# Grados de libertad
+df <- length(p0) - 1
+
+# p-valor
+p_value <- 1 - pchisq(G2, df)
+
+# Resultados
+cat("Estadístico G^2:", G2, "\n")
+cat("Grados de libertad:", df, "\n")
+cat("p-valor:", p_value, "\n")
+
+# Interpretación
+alpha <- 0.05
+if (p_value < alpha) {
+  cat("Rechazamos H0: Las proporciones observadas son significativamente
+      diferentes de las esperadas.\n")
+} else {
+  cat("No podemos rechazar H0: Las proporciones observadas no son
+      significativamente diferentes de las esperadas.\n")
+}
+```
+
+3.  (Wasserman) Sean $X_1, ...X_n \sim Poisson(\lambda)$,
+
+-   Sea $\lambda_0>0$. ¿Cuál es la prueba Wald para
+    $H_0: \lambda = \lambda_0, H_1: \lambda \neq \lambda_0$
+
+La prueba de Wald evalúa si el estimador de $\lambda$ (es decir,
+$\hat{\lambda}$) difiere significativamente del valor hipotético
+$\lambda_0$.
+
+El estadístico de Wald se define como: $$
+W = \frac{(\hat{\lambda} - \lambda_0)^2}{\frac{\hat{\lambda}}{n}},
+$$ donde: $\hat{\lambda} = \bar{X}$: Es el estimador de máxima
+verosimilitud para $\lambda$ en una distribución de Poisson, que
+corresponde a la media muestral. $n$: Tamaño de la muestra.
+
+$H_0$: Bajo la hipótesis nula $H_0: \lambda = \lambda_0$, el estadístico
+$W$ sigue una distribución $\chi^2$ con 1 grado de libertad.
+
+Calculamos el **p-valor** como: $$
+        p = 1 - P(\chi^2 \leq W \mid df = 1),
+        $$ donde $df = 1$ son los grados de libertad. Si $p < \alpha$,
+rechazamos $H_0$, indicando que $\lambda$ es significativamente
+diferente de $\lambda_0$.
+
+### **Fórmula completa para** $W$:
+
+$$
+W = \frac{\left(\bar{X} - \lambda_0\right)^2}{\frac{\bar{X}}{n}}.
+$$
+
+Este estadístico mide la discrepancia entre la media muestral
+($\bar{X}$) y el valor esperado bajo $H_0$, ajustado por la variabilidad
+de la media muestral.
+
+-   Si $\lambda_0=1$, $n=20$ y $\alpha = 0.05$. Simula
+    $X_1, ...X_n \sim Poisson(\lambda_0)$ y realiza la prueba Wald,
+    repite 1000 veces y registra el porcentaje de veces que rechazas
+    $H_0$, qué tan cerca te queda el error del tipo 1 de $0.05$?
+
+```{r}
+
+lambda_0 <- 1    # Valor bajo H0
+n <- 20          # Tamaño de la muestra
+alpha <- 0.05    # Nivel de significancia
+num_sim <- 1000  # Número de simulaciones
+
+# Inicializar contador para rechazos
+rechazos <- 0
+
+# Simulación de 1000 pruebas
+set.seed(123) 
+for (i in 1:num_sim) {
+  # Generar muestra de Poisson
+  x <- rpois(n, lambda_0)
+  
+  # Estimador de lambda (media muestral)
+  lambda_hat <- mean(x)
+  
+  # Estadístico de Wald
+  W <- (lambda_hat - lambda_0)^2 / (lambda_hat / n)
+  
+  # p-valor
+  p_value <- 1 - pchisq(W, df = 1)
+  
+  # Verificar si rechazamos H0
+  if (p_value < alpha) {
+    rechazos <- rechazos + 1
+  }
+}
+
+# Calcular proporción de rechazos
+error_tipo1 <- rechazos / num_sim
+
+# Resultados
+cat("Proporción de rechazos de H0 (Error tipo I):", error_tipo1, "\n")
+cat("Esperado (nivel de significancia):", alpha, "\n")
+
+```
+
+Con un $\alpha = 0.05$ entonces la prueba de Wald está funcionando
+correctamente para este nivel de significancia.

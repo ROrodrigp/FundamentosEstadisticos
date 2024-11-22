@@ -131,3 +131,5 @@ ggplot(data, aes(x = theta, fill = metodo)) +
   theme_minimal() + 
   theme(legend.position = "none")
 ```
+
+Tomando la distribución verdadera como referencia, se puede observar que el bootstrap no paramétrico es la mejor aproximación de la distribución verdadera de $\theta$  su forma es la más cercana a la distribución verdadera, capturando tanto la simetría como las colas de la distribución. 
